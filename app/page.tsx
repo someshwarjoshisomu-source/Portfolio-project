@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import Timeline from "./Timeline";
 import {
   Bot,
@@ -14,7 +14,7 @@ import {
   Sparkles,
   Volume2,
 } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 
 const tech = ["Next.js", "TypeScript", "Python", "PostgreSQL", "Supabase", "OpenAI", "Redis", "MongoDB"];
 
@@ -26,27 +26,50 @@ type ContactErrors = Partial<Record<"name" | "email" | "message" | "form", strin
 
 const proofSignals = [
   "3rd-year CSE undergrad",
-  "Summer 2027 SWE/AI internships",
+  "Summer 2027 internships",
   "5+ hackathons",
   "Backend, AI, and security focus",
 ];
 
-const skillGroups = [
+const engineeringSnapshot = [
   {
-    title: "Backend & Data",
-    items: ["Node.js", "Express", "PostgreSQL", "MongoDB", "Supabase", "API design"],
+    title: "Backend & APIs",
+    copy: "Building Express/Node APIs, authentication flows, and database-backed workflows.",
   },
   {
-    title: "AI & Security",
-    items: ["Scikit-learn", "OpenAI/Gemini APIs", "Threat detection", "RBAC", "RLS"],
+    title: "Data & Storage",
+    copy: "Worked with MongoDB aggregation, PostgreSQL, Supabase, and schema choices for dashboards, auth, and workflow state.",
   },
   {
-    title: "Frontend",
-    items: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    title: "Security",
+    copy: "Interested in authorization, RBAC/RLS, rate limits, and interfaces that make risky actions visible to users.",
   },
   {
-    title: "Engineering Practice",
-    items: ["Testing", "Caching", "Auth flows", "Product thinking", "System design"],
+    title: "Applied AI",
+    copy: "Uses AI APIs and ML pipelines as product features, with attention to explanations, fallback behavior, and user trust.",
+  },
+];
+
+const engineeringCapabilities = [
+  {
+    title: "API & Backend Design",
+    items: ["REST APIs", "Request validation", "Service boundaries", "Protected routes"],
+  },
+  {
+    title: "Authentication & Authorization",
+    items: ["JWT checks", "RBAC/RLS", "Scoped access", "Deny-by-default thinking"],
+  },
+  {
+    title: "Data & Persistence",
+    items: ["MongoDB aggregation", "PostgreSQL", "Supabase", "Dashboard queries"],
+  },
+  {
+    title: "Applied AI Integration",
+    items: ["AI explanations", "ML pipelines", "Fallback states", "Human review boundaries"],
+  },
+  {
+    title: "Security Awareness",
+    items: ["Rate limiting", "Phishing-risk UX", "Protected actions", "Trust boundaries"],
   },
 ];
 
@@ -54,40 +77,44 @@ const projects = [
   {
     title: "ZorFin",
     category: "Financial analytics platform",
-    description:
-      "A full-stack financial analytics platform using MongoDB aggregation for rolling 7-day trend analysis and JWT-based role-aware access.",
-    stack: ["React 19", "Node.js", "Express", "MongoDB", "Recharts"],
+    what:
+      "A full-stack finance dashboard for turning transaction records into trend views and protected role-based workflows.",
+    architecture:
+      "React dashboard, Express API routes, JWT authentication, MongoDB persistence, aggregation queries, and Recharts visualizations.",
+    stack: ["React 19", "Node.js", "Express", "MongoDB", "Recharts", "Jest"],
     demo: "https://zorvyn-finance-assignment-mu.vercel.app/",
     repo: "https://github.com/someshwarjoshisomu-source/zorvyn-finance-assignment",
-    caseStudy: [
-      ["Problem", "Turn raw finance records into decision-ready trend views."],
-      ["Architecture", "Express APIs, MongoDB aggregation, JWT role checks, and Recharts dashboards."],
-      ["Outcome", "A deployable analytics project with tested API paths and protected workflows."],
+    diagram: ["Frontend", "API Layer", "JWT Auth", "MongoDB", "Charts"],
+    decisions: [
+      "Used MongoDB aggregation to keep analytics logic close to the data source.",
+      "Protected finance workflows with role-aware JWT checks.",
+      "Kept chart rendering separate from API response shaping.",
     ],
-    metrics: [
-      "Rolling 7-day analytics with MongoDB aggregation",
-      "JWT role checks across protected finance workflows",
-      "7+ integration and smoke checks for core APIs",
-    ],
+    tradeoff:
+      "MongoDB made flexible analytics iteration faster, but stricter relational reporting would need more deliberate schema design.",
+    future:
+      "Add clearer audit logs, stronger validation around finance records, and more focused test coverage for authorization paths.",
   },
   {
     title: "PhishGuard",
     category: "AI-assisted browser security",
-    description:
-      "An AI-assisted browser security extension that combines a Scikit-learn threat detection pipeline with Gemini explanations to make suspicious links easier to understand.",
-    stack: ["React", "TypeScript", "PostgreSQL", "Redis", "Scikit-learn"],
+    what:
+      "A browser-security prototype that helps users reason about suspicious websites with threat checks and AI-generated explanations.",
+    architecture:
+      "Browser extension UI, API layer, Redis-backed rate limiting, classification pipeline, PostgreSQL storage, and Gemini explanations.",
+    stack: ["React", "TypeScript", "Express", "PostgreSQL", "Redis", "Scikit-learn"],
     demo: "https://golden-hotteok-bbc1c1.netlify.app/",
     repo: "https://github.com/Jathinreddyyanna/ALS-Extension",
-    caseStudy: [
-      ["Problem", "Help users reason about suspicious sites before they make risky decisions."],
-      ["Architecture", "Extension UI, Express services, PostgreSQL storage, Redis rate limits, and an ML scoring pipeline."],
-      ["Outcome", "A security-focused prototype that combines threat labels with AI-generated explanations."],
+    diagram: ["Extension", "API Layer", "Redis", "ML Pipeline", "Database", "AI Explanation"],
+    decisions: [
+      "Separated fast threat checks from slower explanation generation.",
+      "Used rate limiting as part of the security and reliability model.",
+      "Focused the UI on clear risk communication instead of raw model output.",
     ],
-    metrics: [
-      "Layered URL, behavior, and ML threat checks",
-      "Redis-backed rate limiting for real-time scan requests",
-      "AI explanations convert model output into user guidance",
-    ],
+    tradeoff:
+      "AI explanations improve clarity, but the system still needs conservative fallbacks when confidence is low or services fail.",
+    future:
+      "Add stronger URL normalization, model evaluation notes, and a clearer human-review path for uncertain classifications.",
   },
 ];
 
@@ -109,7 +136,7 @@ const codingProfiles = [
   },
 ];
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <div className="mono mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/5 px-3 py-1 text-xs uppercase tracking-[0.18em] text-amber-400">
       <Sparkles size={13} />
@@ -122,7 +149,7 @@ function Card({
   children,
   className = "",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
@@ -138,10 +165,28 @@ function Card({
   );
 }
 
+function ArchitectureFlow({ steps }: { steps: string[] }) {
+  return (
+    <div className="mt-4 grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
+      {steps.map((step, index) => (
+        <div key={step} className="relative">
+          <div className="rounded-lg border border-amber-400/20 bg-amber-400/[0.045] px-3 py-3 text-sm text-slate-200">
+            {step}
+          </div>
+          {index < steps.length - 1 && (
+            <span className="mono absolute -right-2 top-1/2 hidden -translate-y-1/2 text-amber-400/70 sm:block">
+              -&gt;
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [activeProject, setActiveProject] = useState(0);
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [contactErrors, setContactErrors] = useState<ContactErrors>({});
   const [audioStatus, setAudioStatus] = useState<"idle" | "error">("idle");
@@ -168,13 +213,6 @@ export default function Home() {
       setAudioStatus("error");
     }
   }
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveProject((current) => (current + 1) % projects.length);
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -238,7 +276,7 @@ export default function Home() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400" />
             </span>
-            Available for Summer 2027 SWE & AI Internships
+            Available for Summer 2027 SWE, Backend, Platform, and AI Internships
           </div>
 
           <motion.h1
@@ -251,8 +289,7 @@ export default function Home() {
           </motion.h1>
 
           <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">
-            I&apos;m a 3rd-year Computer Science undergrad at VNR VJIET Interested in building backend systems, applied AI, and security-focused product workflows. My projects explore authentication, APIs, database-backed applications, and AI-assisted user experiences, with a growing interest in scalable systems and software architecture.
-
+            I&apos;m a 3rd-year Computer Science undergrad at VNR VJIET interested in building backend systems, applied AI, and security-focused product workflows. My projects explore authentication, APIs, database-backed applications, and AI-assisted user experiences.
           </p>
 
           <div className="mt-7 grid max-w-4xl gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -267,13 +304,32 @@ export default function Home() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
+            <a className="inline-flex h-12 items-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400" href="#projects">
+              View Projects <ChevronRight size={17} />
+            </a>
+            <a
+              className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
+              href="/resume.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <FileText size={17} />
+              Resume
+            </a>
+            <a
+              className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
+              href="#contact"
+            >
+              <Mail size={17} />
+              Contact
+            </a>
             <button
               type="button"
               onClick={handleWelcomeNote}
               className="group inline-flex h-12 items-center gap-3 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/80 hover:shadow-[0_0_28px_rgba(245,158,11,0.2)]"
             >
               {playing ? <Radio size={18} /> : <Volume2 size={18} />}
-              {playing ? "Playing..." : "Play Welcome Note"}
+              {playing ? "Playing..." : "Welcome Note"}
               {playing && (
                 <span className="wave" aria-hidden="true">
                   <span />
@@ -294,25 +350,6 @@ export default function Home() {
                 setAudioStatus("error");
               }}
             />
-            <a className="inline-flex h-12 items-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400" href="#projects">
-              View Systems <ChevronRight size={17} />
-            </a>
-            <a
-              className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
-              href="/resume.pdf"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <FileText size={17} />
-              View Resume
-            </a>
-            <a
-              className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
-              href="#contact"
-            >
-              <Mail size={17} />
-              Contact
-            </a>
           </div>
           {audioStatus === "error" && (
             <p className="mt-3 text-sm text-red-300" aria-live="polite">
@@ -333,7 +370,7 @@ export default function Home() {
         </div>
 
         <div className="relative mx-auto aspect-square w-full max-w-[430px]">
-            <div className="portrait-shell relative h-full overflow-hidden rounded-[2rem] border border-amber-400/20 shadow-[0_0_80px_rgba(245,158,11,0.16)]">
+          <div className="portrait-shell relative h-full overflow-hidden rounded-[2rem] border border-amber-400/20 shadow-[0_0_80px_rgba(245,158,11,0.16)]">
             <Image
               src="/images/SomeshwarJoshi-Profile.jpeg"
               alt="Someshwar Joshi portrait"
@@ -354,18 +391,146 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-8 md:px-8">
-        <SectionLabel>Engineering Stack</SectionLabel>
+      <section className="relative mx-auto w-full max-w-7xl px-5 py-12 md:px-8">
+        <SectionLabel>Engineering Snapshot</SectionLabel>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {skillGroups.map((group) => (
-            <Card key={group.title} className="h-full">
-              <h2 className="text-lg font-semibold text-white">{group.title}</h2>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {group.items.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300"
-                  >
+          {engineeringSnapshot.map((item) => (
+            <Card key={item.title} className="h-full">
+              <h2 className="text-lg font-semibold text-white">{item.title}</h2>
+              <p className="mt-4 text-sm leading-6 text-slate-400">{item.copy}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative mx-auto w-full max-w-7xl px-5 py-14 md:px-8">
+        <SectionLabel>Experience</SectionLabel>
+        <Card className="group relative overflow-visible">
+          <div className="absolute right-5 top-5 rounded-full border border-white/10 p-3 text-slate-500 transition group-hover:border-amber-400/50 group-hover:text-amber-400">
+            <LockKeyhole size={22} />
+          </div>
+          <p className="text-sm text-amber-400">July 2025 - Nov 2025</p>
+          <h2 className="mt-2 pr-14 text-3xl font-semibold">Software Engineer Intern at Forte</h2>
+          <p className="mt-4 max-w-3xl text-slate-400">
+            Built ForteHR features using React, TypeScript, Supabase RLS/RBAC, and OpenAI API integrations.
+          </p>
+          <ul className="mt-6 grid gap-3 text-sm text-slate-300">
+            <li className="flex gap-3 leading-6">
+              <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
+              <span>Built authenticated HR workflows with typed React interfaces and role-aware application states.</span>
+            </li>
+            <li className="group/lock rounded-lg border border-white/10 bg-white/[0.025] p-3 transition hover:border-amber-400/50">
+              <div className="flex gap-3 leading-6">
+                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
+                <span>Worked with Supabase RLS/RBAC policies to keep access decisions close to the data layer.</span>
+              </div>
+              <div className="mt-3 hidden rounded-lg border border-amber-400/30 bg-zinc-950 p-4 shadow-2xl shadow-amber-950/30 group-hover/lock:block">
+                <p className="mono text-xs text-amber-400">ACCESS MODEL</p>
+                <div className="mt-3 grid gap-2 text-xs text-slate-300">
+                  <span>Admin - HR Manager - Recruiter</span>
+                  <span>Team Lead - Employee - Candidate</span>
+                  <span className="text-emerald-400">Default posture: scoped access</span>
+                </div>
+              </div>
+            </li>
+            <li className="flex gap-3 leading-6">
+              <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
+              <span>Integrated OpenAI-assisted flows where automation could support HR operations without replacing review.</span>
+            </li>
+          </ul>
+        </Card>
+      </section>
+
+      <section className="relative mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
+        <SectionLabel>Research</SectionLabel>
+        <Card className="cluster-bg group relative overflow-hidden">
+          <p className="text-sm text-amber-400">Aug 2025</p>
+          <h2 className="mt-2 text-3xl font-semibold">Water Quality Research Work</h2>
+          <p className="mt-4 leading-7 text-slate-300">
+            Worked on a water quality assessment study exploring EF-BER with clustering and KNN. I keep this framed as research work unless a public proceedings link is available.
+          </p>
+          <div className="mt-6 grid gap-3 text-sm text-slate-300 md:grid-cols-2">
+            <div className="rounded-lg border border-white/10 bg-white/[0.025] p-4">
+              <span className="mono text-xs uppercase tracking-[0.16em] text-amber-400">Focus</span>
+              <p className="mt-2">Data preprocessing, clustering behavior, KNN classification, and evaluation framing.</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/[0.025] p-4">
+              <span className="mono text-xs uppercase tracking-[0.16em] text-amber-400">Credibility note</span>
+              <p className="mt-2">Shown as research experience, not over-claimed as a published result without a public link.</p>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <section id="projects" className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
+        <SectionLabel>Project Case Studies</SectionLabel>
+        <div className="mb-8 max-w-3xl">
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Backend-focused projects with architecture notes.</h2>
+          <p className="mt-4 leading-7 text-slate-400">
+            These are framed around engineering decisions, tradeoffs, and next steps instead of inflated impact claims.
+          </p>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-2">
+          {projects.map((project, index) => (
+            <Card key={project.title} className="flex h-full flex-col bg-[#121214]">
+              <p className="mono text-xs uppercase tracking-[0.2em] text-amber-400">
+                Case Study 0{index + 1}
+              </p>
+              <h2 className="mt-4 text-4xl font-semibold">{project.title}</h2>
+              <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
+                {project.category}
+              </p>
+              <div className="mt-5 grid gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-4 text-sm text-slate-300 sm:grid-cols-3">
+                <a className="transition hover:text-amber-400" href={project.repo} target="_blank" rel="noreferrer">
+                  <span className="mono block text-[11px] uppercase tracking-[0.18em] text-slate-500">Repository</span>
+                  GitHub
+                </a>
+                <a className="transition hover:text-amber-400" href={project.demo} target="_blank" rel="noreferrer">
+                  <span className="mono block text-[11px] uppercase tracking-[0.18em] text-slate-500">Demo</span>
+                  Live build
+                </a>
+                <div>
+                  <span className="mono block text-[11px] uppercase tracking-[0.18em] text-slate-500">Tech Stack</span>
+                  {project.stack.slice(0, 3).join(", ")}
+                </div>
+              </div>
+              <p className="mt-5 leading-7 text-slate-300">{project.what}</p>
+
+              <div className="mt-7">
+                <p className="mono text-xs uppercase tracking-[0.18em] text-amber-400">Architecture</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{project.architecture}</p>
+                <ArchitectureFlow steps={project.diagram} />
+              </div>
+
+              <div className="mt-7 grid gap-4">
+                <div>
+                  <p className="mono text-xs uppercase tracking-[0.18em] text-amber-400">Engineering decisions</p>
+                  <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-300">
+                    {project.decisions.map((decision) => (
+                      <li key={decision} className="flex gap-3">
+                        <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
+                        <span>{decision}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.025] p-4">
+                    <p className="mono text-xs uppercase tracking-[0.18em] text-slate-500">Tradeoff</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{project.tradeoff}</p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.025] p-4">
+                    <p className="mono text-xs uppercase tracking-[0.18em] text-slate-500">Future improvement</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{project.future}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7 flex flex-wrap gap-2">
+                {project.stack.map((item) => (
+                  <span key={item} className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-slate-300">
                     {item}
                   </span>
                 ))}
@@ -375,176 +540,26 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-8 md:px-8" aria-hidden="true">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-400/25 to-transparent" />
-      </section>
-
-      <Timeline />
-
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-8 md:px-8" aria-hidden="true">
-        <div className="mx-auto h-16 max-w-3xl rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.1),transparent_68%)]" />
-      </section>
-
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-14 md:px-8">
-        <SectionLabel>Experience & Research</SectionLabel>
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Card className="group relative overflow-visible">
-            <div className="absolute right-5 top-5 rounded-full border border-white/10 p-3 text-slate-500 transition group-hover:border-amber-400/50 group-hover:text-amber-400">
-              <LockKeyhole size={22} />
-            </div>
-            <p className="text-sm text-amber-400">July 2025 - Nov 2025</p>
-            <h2 className="mt-2 text-3xl font-semibold">Software Engineer Intern at Forte</h2>
-            <p className="mt-4 text-slate-400">Built ForteHR using React, TypeScript, Supabase RLS/RBAC, and the OpenAI API.</p>
-            <ul className="mt-6 grid gap-3 text-sm text-slate-300">
-              <li className="flex gap-3 leading-6">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
-                <span>Built authenticated HR workflows with typed React interfaces.</span>
-              </li>
-              <li className="group/lock rounded-lg border border-white/10 bg-white/[0.025] p-3 transition hover:border-amber-400/50">
-                <div className="flex gap-3 leading-6">
-                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
-                  <span>Implemented role-aware access with Supabase RLS/RBAC policies.</span>
-                </div>
-                <div className="mt-3 hidden rounded-lg border border-amber-400/30 bg-zinc-950 p-4 shadow-2xl shadow-amber-950/30 group-hover/lock:block">
-                  <p className="mono text-xs text-amber-400">ROLE HIERARCHY</p>
-                  <div className="mt-3 grid gap-2 text-xs text-slate-300">
-                    <span>Admin to HR Manager to Recruiter</span>
-                    <span>Team Lead to Employee to Candidate</span>
-                    <span className="text-emerald-400">Policy: deny-by-default</span>
-                  </div>
-                </div>
-              </li>
-              <li className="flex gap-3 leading-6">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
-                <span>Integrated OpenAI-assisted flows for selected HR operations.</span>
-              </li>
-            </ul>
-            {false && (
-            <div className="hidden">
-              <p>• Shipped authenticated HR workflows with typed React interfaces.</p>
-              <div className="group/lock relative rounded-lg border border-white/10 bg-white/[0.025] p-3 transition hover:border-amber-400/50">
-                • Hardened RBAC and row-level security for role-aware access.
-                <div className="pointer-events-none absolute left-5 top-full z-10 mt-3 w-72 rounded-lg border border-amber-400/30 bg-zinc-950 p-4 opacity-0 shadow-2xl shadow-amber-950/30 transition group-hover/lock:opacity-100">
-                  <p className="mono text-xs text-amber-400">ROLE HIERARCHY</p>
-                  <div className="mt-3 grid gap-2 text-xs text-slate-300">
-                    <span>Admin → HR Manager → Recruiter</span>
-                    <span>Team Lead → Employee → Candidate</span>
-                    <span className="text-emerald-400">Policy: deny-by-default</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            )}
-          </Card>
-
-          <Card className="cluster-bg group relative overflow-hidden">
-            <div className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100" />
-            <p className="text-sm text-amber-400">Aug 2025</p>
-            <h2 className="mt-2 text-3xl font-semibold">ICACECS 2025 Research Work</h2>
-            <p className="mt-4 leading-7 text-slate-300">
-              Worked on a water quality assessment study exploring EF-BER with clustering and KNN. Keeping this framed as research work unless a public paper or proceedings link is available.
-            </p>
-          </Card>
+      <section className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
+        <SectionLabel>Engineering Capabilities</SectionLabel>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {engineeringCapabilities.map((capability) => (
+            <Card key={capability.title} className="h-full">
+              <h2 className="text-base font-semibold text-white">{capability.title}</h2>
+              <ul className="mt-4 grid gap-2 text-sm leading-6 text-slate-400">
+                {capability.items.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-400" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
         </div>
       </section>
 
-      <section id="projects" className="relative mx-auto w-full max-w-7xl px-5 py-24 md:px-8">
-        <SectionLabel>Engineered Projects</SectionLabel>
-        <Card className="relative min-h-[860px] overflow-hidden bg-[#121214] p-0 lg:h-[860px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.16),transparent_34%)]" />
-          <div className="relative flex min-h-[780px] p-6 sm:p-8 lg:h-[780px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={projects[activeProject].title}
-                initial={{ opacity: 0, x: 28 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -28 }}
-                transition={{ duration: 0.42, ease: "easeOut" }}
-                className="flex w-full flex-col justify-between"
-              >
-                <div>
-                  <p className="mono text-xs uppercase tracking-[0.2em] text-amber-400">
-                    Case Study 0{activeProject + 1}
-                  </p>
-                  <h2 className="mt-4 text-4xl font-semibold sm:text-5xl">
-                    {projects[activeProject].title}
-                  </h2>
-                  <p className="mt-3 text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                    {projects[activeProject].category}
-                  </p>
-                  <p className="mt-5 max-w-4xl text-lg leading-8 text-slate-300">
-                    {projects[activeProject].description}
-                  </p>
-                  <div className="mt-8 grid gap-3 lg:grid-cols-3">
-                    {projects[activeProject].caseStudy.map(([label, detail]) => (
-                      <div
-                        key={label}
-                        className="rounded-lg border border-white/10 bg-white/[0.025] p-4"
-                      >
-                        <span className="mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                          {label}
-                        </span>
-                        <p className="mt-2 text-sm leading-6 text-slate-300">{detail}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-8 flex flex-wrap gap-2">
-                    {projects[activeProject].stack.map((item) => (
-                      <span key={item} className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-slate-300">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-8 grid gap-3 md:grid-cols-3">
-                    {projects[activeProject].metrics.map((metric) => (
-                      <div
-                        key={metric}
-                        className="rounded-lg border border-amber-400/15 bg-amber-400/[0.045] p-4 text-sm leading-6 text-slate-300"
-                      >
-                        <span className="mono mb-2 block text-[11px] uppercase tracking-[0.18em] text-amber-400">
-                          Product Signal
-                        </span>
-                        {metric}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <a
-                    className="inline-flex h-11 items-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400"
-                    href={projects[activeProject].demo}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Live Demo
-                  </a>
-                  <a
-                    className="inline-flex h-11 items-center gap-2 rounded-lg border border-white/15 px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
-                    href={projects[activeProject].repo}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Code2 size={17} />
-                    GitHub
-                  </a>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="relative flex h-20 items-center justify-center gap-2 border-t border-white/10 px-6 py-4">
-            {projects.map((project, index) => (
-              <button
-                key={project.title}
-                onClick={() => setActiveProject(index)}
-                aria-label={`Show ${project.title}`}
-                className={`h-2.5 rounded-full transition-all ${activeProject === index ? "w-8 bg-amber-400" : "w-2.5 bg-white/20 hover:bg-white/40"}`}
-              />
-            ))}
-          </div>
-        </Card>
-      </section>
-
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-24 md:px-8">
+      <section className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
         <SectionLabel>Achievements</SectionLabel>
         <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
           <Card className="group relative min-h-72 overflow-hidden border-amber-400/20">
@@ -567,27 +582,33 @@ export default function Home() {
               <Bot className="text-amber-400" size={34} />
               <p className="mt-8 text-sm text-amber-400">Designathon 2nd Runner-Up - Mar 2026</p>
               <h2 className="mt-2 text-3xl font-semibold">PhishGuard</h2>
-              <p className="mt-4 leading-7 text-slate-400">Designed a security experience that turns suspicious browser behavior into clear threat states, AI explanations, and user-facing decisions.</p>
+              <p className="mt-4 leading-7 text-slate-400">
+                Designed a security experience that turns suspicious browser behavior into clear threat states, AI explanations, and user-facing decisions.
+              </p>
             </Card>
           </motion.div>
         </div>
         <Card className="mt-5 border-amber-400/20 bg-amber-400/[0.045]">
           <p className="mono text-xs uppercase tracking-[0.18em] text-amber-400">Builder Momentum</p>
           <h2 className="mt-3 text-2xl font-semibold">Participated in 5+ hackathons and design sprints</h2>
-          <p className="mt-3 max-w-3xl leading-7 text-slate-300">
-            These builds shaped my approach to fast product discovery, scoped engineering execution, secure-by-default thinking, and presenting technical decisions clearly under time pressure.
-          </p>
+          <div className="mt-4 grid gap-3 text-sm text-slate-300 sm:grid-cols-2 lg:grid-cols-4">
+            {["Rapid prototyping", "Team collaboration", "Demo storytelling", "Technical decisions under deadlines"].map((item) => (
+              <div key={item} className="rounded-lg border border-amber-400/15 bg-black/15 px-4 py-3">
+                {item}
+              </div>
+            ))}
+          </div>
         </Card>
       </section>
 
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
+      <section className="relative mx-auto w-full max-w-7xl px-5 py-12 md:px-8">
         <SectionLabel>Coding Profiles</SectionLabel>
         <Card className="bg-[#121214]">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Problem solving profiles</h2>
               <p className="mt-3 max-w-2xl leading-7 text-slate-400">
-                Verified competitive programming and DSA practice profiles.
+                Competitive programming and DSA practice links for quick verification.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -612,24 +633,19 @@ export default function Home() {
         </Card>
       </section>
 
+      <Timeline />
+
       <section id="contact" className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
-        <SectionLabel>Let's Connect</SectionLabel>
+        <SectionLabel>Contact</SectionLabel>
         <Card className="bg-[#121214]">
           <div className="mb-6 max-w-3xl">
             <h2 className="text-2xl font-semibold">Open to internships, networking, and technical discussions</h2>
             <p className="mt-3 leading-7 text-slate-400">
-              I&apos;m actively preparing for Summer 2027 SWE/AI roles and looking to learn from engineers building reliable, secure, scalable products.
+              Interested in discussing software engineering, backend systems, applied AI, security-focused products, and Summer 2027 opportunities.
             </p>
           </div>
           <form onSubmit={handleContactSubmit} className="grid gap-5" noValidate>
-            <input
-              type="text"
-              name="_gotcha"
-              tabIndex={-1}
-              autoComplete="off"
-              className="hidden"
-              aria-hidden="true"
-            />
+            <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
             <div className="grid gap-5 md:grid-cols-2">
               <label className="grid gap-2 text-sm text-slate-300">
                 Name
@@ -700,27 +716,6 @@ export default function Home() {
         </Card>
       </section>
 
-      <section className="relative mx-auto w-full max-w-7xl px-5 py-24 md:px-8">
-        <SectionLabel>/now</SectionLabel>
-        <div className="rounded-lg border border-white/10 bg-[#0d1117] shadow-2xl shadow-black/35">
-          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-            <span className="size-3 rounded-full bg-red-400" />
-            <span className="size-3 rounded-full bg-amber-400" />
-            <span className="size-3 rounded-full bg-emerald-400" />
-            <span className="mono ml-3 text-xs text-slate-500">now.md</span>
-          </div>
-          <div className="mono group relative p-6 text-sm leading-7 text-slate-300 sm:text-base">
-            <p><span className="text-slate-500">#</span> Now</p>
-            <p className="mt-4">3rd-year CSE undergrad at VNR VJIET.</p>
-            <p>Learning distributed systems architecture and secure product engineering.</p>
-            <p>Preparing for the Summer 2027 hiring cycle and open to networking.<span className="ml-1 inline-block h-5 w-2 animate-pulse bg-amber-400 align-middle" /></p>
-            <span className="absolute right-5 top-5 rounded-md border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-500 opacity-0 transition group-hover:opacity-100">
-              Last updated: 3 mins ago
-            </span>
-          </div>
-        </div>
-      </section>
-
       <footer className="relative mx-auto flex w-full max-w-7xl flex-col gap-5 border-t border-white/10 px-5 py-9 text-sm text-slate-400 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex flex-wrap gap-4">
           <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://github.com/someshwarjoshisomu-source" target="_blank" rel="noreferrer"><Code2 size={17} />GitHub</a>
@@ -731,6 +726,7 @@ export default function Home() {
           <a className="inline-flex items-center gap-2 transition hover:text-white" href="/resume.pdf" target="_blank" rel="noreferrer"><FileText size={17} />Resume</a>
         </div>
         <button
+          type="button"
           onMouseEnter={() => setFooterHash(true)}
           onMouseLeave={() => setFooterHash(false)}
           className="hash-cycle mono text-left text-xs text-emerald-400"
@@ -738,7 +734,6 @@ export default function Home() {
           {footerHash ? "HANDSHAKE_ACCEPTED // BUILD_WHAT_SCALES" : "VNR-VJIET-NODE-01 // LATENCY: 12ms // STATUS: PRODUCTION_READY"}
         </button>
       </footer>
-
     </main>
   );
 }
