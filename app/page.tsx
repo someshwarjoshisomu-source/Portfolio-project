@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Timeline from "./Timeline";
 import {
   Bot,
+  ChevronLeft,
   ChevronRight,
   Code2,
   FileText,
@@ -190,7 +191,9 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [contactErrors, setContactErrors] = useState<ContactErrors>({});
   const [audioStatus, setAudioStatus] = useState<"idle" | "error">("idle");
+  const [activeProject, setActiveProject] = useState(0);
   const [footerHash, setFooterHash] = useState(false);
+  const project = projects[activeProject];
 
   useEffect(() => {
     if (!playing) return;
@@ -263,6 +266,14 @@ export default function Home() {
       setContactErrors({ form: "Message could not be sent. Please try again." });
       setFormStatus("error");
     }
+  }
+
+  function showPreviousProject() {
+    setActiveProject((current) => (current === 0 ? projects.length - 1 : current - 1));
+  }
+
+  function showNextProject() {
+    setActiveProject((current) => (current + 1) % projects.length);
   }
 
   return (
@@ -463,47 +474,62 @@ export default function Home() {
       </section>
 
       <section id="projects" className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
-        <SectionLabel>Project Case Studies</SectionLabel>
-        <div className="mb-8 max-w-3xl">
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Backend-focused projects with architecture notes.</h2>
-          <p className="mt-4 leading-7 text-slate-400">
-            These are framed around engineering decisions, tradeoffs, and next steps instead of inflated impact claims.
-          </p>
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <SectionLabel>Project Case Studies</SectionLabel>
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl">Backend-focused projects with architecture notes.</h2>
+            <p className="mt-4 leading-7 text-slate-400">
+              These are framed around engineering decisions, tradeoffs, and next steps instead of inflated impact claims.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={showPreviousProject}
+              aria-label="Show previous project"
+              className="inline-flex size-11 items-center justify-center rounded-lg border border-white/15 bg-white/[0.03] text-white transition hover:border-amber-400/60 hover:text-amber-400"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={showNextProject}
+              aria-label="Show next project"
+              className="inline-flex size-11 items-center justify-center rounded-lg border border-white/15 bg-white/[0.03] text-white transition hover:border-amber-400/60 hover:text-amber-400"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2">
-          {projects.map((project, index) => (
-            <Card key={project.title} className="flex h-full flex-col bg-[#121214]">
+        <Card className="overflow-hidden bg-[#121214] p-0">
+          <div className="relative min-h-[760px] p-6 sm:p-8 lg:min-h-[640px]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(245,158,11,0.15),transparent_34%)]" />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={project.title}
+                initial={{ opacity: 0, x: 28 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -28 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="relative flex h-full flex-col"
+              >
               <p className="mono text-xs uppercase tracking-[0.2em] text-amber-400">
-                Case Study 0{index + 1}
+                Case Study 0{activeProject + 1}
               </p>
               <h2 className="mt-4 text-4xl font-semibold">{project.title}</h2>
               <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
                 {project.category}
               </p>
-              <div className="mt-5 grid gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-4 text-sm text-slate-300 sm:grid-cols-3">
-                <a className="transition hover:text-amber-400" href={project.repo} target="_blank" rel="noreferrer">
-                  <span className="mono block text-[11px] uppercase tracking-[0.18em] text-slate-500">Repository</span>
-                  GitHub
-                </a>
-                <a className="transition hover:text-amber-400" href={project.demo} target="_blank" rel="noreferrer">
-                  <span className="mono block text-[11px] uppercase tracking-[0.18em] text-slate-500">Demo</span>
-                  Live build
-                </a>
-                <div>
-                  <span className="mono block text-[11px] uppercase tracking-[0.18em] text-slate-500">Tech Stack</span>
-                  {project.stack.slice(0, 3).join(", ")}
-                </div>
-              </div>
               <p className="mt-5 leading-7 text-slate-300">{project.what}</p>
 
-              <div className="mt-7">
+              <div className="mt-6">
                 <p className="mono text-xs uppercase tracking-[0.18em] text-amber-400">Architecture</p>
                 <p className="mt-2 text-sm leading-6 text-slate-400">{project.architecture}</p>
                 <ArchitectureFlow steps={project.diagram} />
               </div>
 
-              <div className="mt-7 grid gap-4">
+              <div className="mt-6 grid gap-4">
                 <div>
                   <p className="mono text-xs uppercase tracking-[0.18em] text-amber-400">Engineering decisions</p>
                   <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-300">
@@ -528,16 +554,49 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-7 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
                 {project.stack.map((item) => (
                   <span key={item} className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-slate-300">
                     {item}
                   </span>
                 ))}
               </div>
-            </Card>
-          ))}
-        </div>
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <a
+                  className="inline-flex h-11 items-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400"
+                  href={project.demo}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Live Demo
+                </a>
+                <a
+                  className="inline-flex h-11 items-center gap-2 rounded-lg border border-white/15 px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
+                  href={project.repo}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Code2 size={17} />
+                  GitHub
+                </a>
+              </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          <div className="relative flex h-16 items-center justify-center gap-2 border-t border-white/10 px-6">
+            {projects.map((item, index) => (
+              <button
+                key={item.title}
+                type="button"
+                onClick={() => setActiveProject(index)}
+                aria-label={`Show ${item.title}`}
+                aria-current={activeProject === index}
+                className={`h-2.5 rounded-full transition-all ${activeProject === index ? "w-8 bg-amber-400" : "w-2.5 bg-white/20 hover:bg-white/40"}`}
+              />
+            ))}
+          </div>
+        </Card>
       </section>
 
       <section className="relative mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
