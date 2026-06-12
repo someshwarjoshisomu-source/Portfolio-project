@@ -14,9 +14,15 @@ import {
   Sparkles,
   Volume2,
 } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 const tech = ["Next.js", "TypeScript", "Python", "PostgreSQL", "Supabase", "OpenAI", "Redis", "MongoDB"];
+
+const FORMSPREE_FORM_ID = process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID;
+const FORMSPREE_ENDPOINT = FORMSPREE_FORM_ID ? `https://formspree.io/f/${FORMSPREE_FORM_ID}` : "";
+const WELCOME_AUDIO_SRC = "/audio/welcome.mp3";
+
+type ContactErrors = Partial<Record<"name" | "email" | "message" | "form", string>>;
 
 const proofSignals = [
   "3rd-year CSE undergrad",
@@ -134,8 +140,11 @@ function Card({
 
 export default function Home() {
   const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeProject, setActiveProject] = useState(0);
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [contactErrors, setContactErrors] = useState<ContactErrors>({});
+  const [audioStatus, setAudioStatus] = useState<"idle" | "error">("idle");
   const [footerHash, setFooterHash] = useState(false);
 
   useEffect(() => {
@@ -143,6 +152,22 @@ export default function Home() {
     const timer = window.setTimeout(() => setPlaying(false), 5000);
     return () => window.clearTimeout(timer);
   }, [playing]);
+
+  async function handleWelcomeNote() {
+    const audio = audioRef.current;
+    setAudioStatus("idle");
+    setPlaying(true);
+
+    if (!audio) return;
+
+    try {
+      audio.currentTime = 0;
+      await audio.play();
+    } catch {
+      setPlaying(false);
+      setAudioStatus("error");
+    }
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -153,36 +178,51 @@ export default function Home() {
 
   async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (formStatus === "sending") return;
+
     const form = event.currentTarget;
     const data = new FormData(form);
-    const endpoint =
-      process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT ||
-      process.env.NEXT_PUBLIC_WEB3FORMS_ENDPOINT;
+    const name = String(data.get("name") || "").trim();
+    const email = String(data.get("email") || "").trim();
+    const message = String(data.get("message") || "").trim();
+    const gotcha = String(data.get("_gotcha") || "").trim();
+    const nextErrors: ContactErrors = {};
 
-    if (!endpoint) {
-      const name = String(data.get("name") || "");
-      const email = String(data.get("email") || "");
-      const message = String(data.get("message") || "");
-      window.location.href = `mailto:someshwarjoshi.somu@gmail.com?subject=${encodeURIComponent(
-        `Portfolio message from ${name || "visitor"}`,
-      )}&body=${encodeURIComponent(`${message}\n\nFrom: ${name}\nEmail: ${email}`)}`;
-      setFormStatus("sent");
-      form.reset();
+    if (gotcha) return;
+    if (!name) nextErrors.name = "Please enter your name.";
+    if (!email) {
+      nextErrors.email = "Please enter your email.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = "Please enter a valid email address.";
+    }
+    if (!message) nextErrors.message = "Please enter a message.";
+    if (!FORMSPREE_ENDPOINT) nextErrors.form = "Contact form is not configured yet.";
+
+    if (Object.keys(nextErrors).length > 0) {
+      setContactErrors(nextErrors);
+      setFormStatus("error");
       return;
     }
 
     setFormStatus("sending");
+    setContactErrors({});
+
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
-        headers: { Accept: "application/json" },
-        body: data,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, message }),
       });
 
       if (!response.ok) throw new Error("Contact form request failed");
       setFormStatus("sent");
+      setContactErrors({});
       form.reset();
     } catch {
+      setContactErrors({ form: "Message could not be sent. Please try again." });
       setFormStatus("error");
     }
   }
@@ -228,7 +268,8 @@ export default function Home() {
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <button
-              onClick={() => setPlaying(true)}
+              type="button"
+              onClick={handleWelcomeNote}
               className="group inline-flex h-12 items-center gap-3 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/80 hover:shadow-[0_0_28px_rgba(245,158,11,0.2)]"
             >
               {playing ? <Radio size={18} /> : <Volume2 size={18} />}
@@ -243,12 +284,22 @@ export default function Home() {
                 </span>
               )}
             </button>
+            <audio
+              ref={audioRef}
+              src={WELCOME_AUDIO_SRC}
+              preload="metadata"
+              onEnded={() => setPlaying(false)}
+              onError={() => {
+                setPlaying(false);
+                setAudioStatus("error");
+              }}
+            />
             <a className="inline-flex h-12 items-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400" href="#projects">
               View Systems <ChevronRight size={17} />
             </a>
             <a
               className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-5 text-sm font-medium text-white transition hover:border-amber-400/60"
-              href="/someshwar-joshi-resume.pdf"
+              href="/resume.pdf"
               target="_blank"
               rel="noreferrer"
             >
@@ -263,6 +314,11 @@ export default function Home() {
               Contact
             </a>
           </div>
+          {audioStatus === "error" && (
+            <p className="mt-3 text-sm text-red-300" aria-live="polite">
+              Welcome note could not be played in this browser.
+            </p>
+          )}
 
           <div className="mt-14 flex flex-wrap gap-2">
             {tech.map((item) => (
@@ -279,12 +335,12 @@ export default function Home() {
         <div className="relative mx-auto aspect-square w-full max-w-[430px]">
             <div className="portrait-shell relative h-full overflow-hidden rounded-[2rem] border border-amber-400/20 shadow-[0_0_80px_rgba(245,158,11,0.16)]">
             <Image
-              src="/someshwar-portrait.png"
+              src="/images/SomeshwarJoshi-Profile.jpeg"
               alt="Someshwar Joshi portrait"
               fill
               priority
               sizes="(max-width: 640px) 80vw, (max-width: 1024px) 45vw, 430px"
-              className="object-cover object-center opacity-95 mix-blend-luminosity"
+              className="object-cover object-center opacity-95"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent" />
           </div>
@@ -565,7 +621,15 @@ export default function Home() {
               I&apos;m actively preparing for Summer 2027 SWE/AI roles and looking to learn from engineers building reliable, secure, scalable products.
             </p>
           </div>
-          <form onSubmit={handleContactSubmit} className="grid gap-5">
+          <form onSubmit={handleContactSubmit} className="grid gap-5" noValidate>
+            <input
+              type="text"
+              name="_gotcha"
+              tabIndex={-1}
+              autoComplete="off"
+              className="hidden"
+              aria-hidden="true"
+            />
             <div className="grid gap-5 md:grid-cols-2">
               <label className="grid gap-2 text-sm text-slate-300">
                 Name
@@ -573,9 +637,16 @@ export default function Home() {
                   required
                   name="name"
                   type="text"
+                  aria-invalid={Boolean(contactErrors.name)}
+                  aria-describedby={contactErrors.name ? "contact-name-error" : undefined}
                   className="h-12 rounded-lg border border-white/10 bg-transparent px-4 text-white outline-none transition placeholder:text-slate-600 focus:border-amber-400"
                   placeholder="Your name"
                 />
+                {contactErrors.name && (
+                  <span id="contact-name-error" className="text-xs text-red-300">
+                    {contactErrors.name}
+                  </span>
+                )}
               </label>
               <label className="grid gap-2 text-sm text-slate-300">
                 Email
@@ -583,9 +654,16 @@ export default function Home() {
                   required
                   name="email"
                   type="email"
+                  aria-invalid={Boolean(contactErrors.email)}
+                  aria-describedby={contactErrors.email ? "contact-email-error" : undefined}
                   className="h-12 rounded-lg border border-white/10 bg-transparent px-4 text-white outline-none transition placeholder:text-slate-600 focus:border-amber-400"
                   placeholder="you@example.com"
                 />
+                {contactErrors.email && (
+                  <span id="contact-email-error" className="text-xs text-red-300">
+                    {contactErrors.email}
+                  </span>
+                )}
               </label>
             </div>
             <label className="grid gap-2 text-sm text-slate-300">
@@ -594,14 +672,21 @@ export default function Home() {
                 required
                 name="message"
                 minLength={10}
+                aria-invalid={Boolean(contactErrors.message)}
+                aria-describedby={contactErrors.message ? "contact-message-error" : undefined}
                 className="min-h-[120px] resize-y rounded-lg border border-white/10 bg-transparent px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-amber-400"
                 placeholder="Tell me what you are building, hiring for, or curious about."
               />
+              {contactErrors.message && (
+                <span id="contact-message-error" className="text-xs text-red-300">
+                  {contactErrors.message}
+                </span>
+              )}
             </label>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500" aria-live="polite">
                 {formStatus === "sent" && "Message ready. Thanks for reaching out."}
-                {formStatus === "error" && "Something failed. Please try again or email directly."}
+                {formStatus === "error" && (contactErrors.form || "Please fix the highlighted fields.")}
               </p>
               <button
                 type="submit"
@@ -638,11 +723,12 @@ export default function Home() {
 
       <footer className="relative mx-auto flex w-full max-w-7xl flex-col gap-5 border-t border-white/10 px-5 py-9 text-sm text-slate-400 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex flex-wrap gap-4">
-          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://github.com/someshwarjoshisomu-source" target="_blank"><Code2 size={17} />GitHub</a>
-          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://leetcode.com/u/SomeshwarJoshi/" target="_blank"><Code2 size={17} />LeetCode</a>
-          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://codeforces.com/profile/someshwarjoshi.somu" target="_blank"><Code2 size={17} />Codeforces</a>
+          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://github.com/someshwarjoshisomu-source" target="_blank" rel="noreferrer"><Code2 size={17} />GitHub</a>
+          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://leetcode.com/u/SomeshwarJoshi/" target="_blank" rel="noreferrer"><Code2 size={17} />LeetCode</a>
+          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://codeforces.com/profile/someshwarjoshi.somu" target="_blank" rel="noreferrer"><Code2 size={17} />Codeforces</a>
+          <a className="inline-flex items-center gap-2 transition hover:text-white" href="https://www.codechef.com/users/lively_zeal_60" target="_blank" rel="noreferrer"><Code2 size={17} />CodeChef</a>
           <a className="inline-flex items-center gap-2 transition hover:text-white" href="mailto:someshwarjoshi.somu@gmail.com"><Mail size={17} />Email</a>
-          <a className="inline-flex items-center gap-2 transition hover:text-white" href="/someshwar-joshi-resume.pdf" target="_blank"><FileText size={17} />Resume</a>
+          <a className="inline-flex items-center gap-2 transition hover:text-white" href="/resume.pdf" target="_blank" rel="noreferrer"><FileText size={17} />Resume</a>
         </div>
         <button
           onMouseEnter={() => setFooterHash(true)}
