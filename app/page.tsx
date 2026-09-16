@@ -599,7 +599,12 @@ export default function Home() {
 
     if (cleanCmd === "help") {
       response =
-        "Available directives:\n- status: Current degree, CGPA, graduation date\n- cv-pipeline: MyClassBoard ONNX facial inference status\n- projects: List active production projects\n- skills: Output core tech stack\n- ping: Check telemetry latency\n- clear: Clear terminal screen";
+        "Available directives:\n- status: Current degree, CGPA, graduation date\n- cv-pipeline: MyClassBoard ONNX facial inference status\n- projects: List active production projects\n- skills: Output core tech stack\n- resume: Open verified resume PDF in new tab\n- ping: Check telemetry latency\n- clear: Clear terminal screen";
+    } else if (cleanCmd === "resume") {
+      if (typeof window !== "undefined") {
+        window.open("/resume.pdf", "_blank");
+      }
+      response = "Dispatched instruction: Opening /resume.pdf in new browser viewport.";
     } else if (cleanCmd === "status") {
       response =
         "NODE STATUS: ONLINE\nInstitution: VNR VJIET (B.Tech Computer Science & Engineering)\nCGPA: 9.1 / 10.0\nExpected Graduation: May 2028\nTarget: Summer 2027 SWE, Backend & Applied AI Internships";
@@ -899,6 +904,15 @@ export default function Home() {
               >
                 <span>Inspect Projects</span>
                 <ChevronRight size={14} />
+              </a>
+              <a
+                href="/resume.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-sky-500/50 text-xs font-mono text-zinc-300 hover:text-white transition-all flex items-center gap-2"
+              >
+                <FileText size={14} className="text-sky-400" />
+                <span>View Resume</span>
               </a>
               <button
                 onClick={() => setCommandPaletteOpen(true)}
