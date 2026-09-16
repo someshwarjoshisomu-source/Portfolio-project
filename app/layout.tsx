@@ -17,18 +17,18 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio-project.v
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Someshwar Joshi | SWE, Backend & Applied AI Portfolio",
+    default: "Someshwar Joshi | Backend & Applied AI Engineering Node",
     template: "%s | Someshwar Joshi",
   },
   description:
-    "3rd-year CSE undergrad at VNR VJIET interested in backend systems, applied AI, security-focused workflows, and Summer 2027 SWE internships.",
+    "3rd-year CSE undergrad at VNR VJIET (CGPA: 9.1) building scalable backend web services, computer vision pipelines, and automated architectures using Java, Python, and cloud infrastructure. Open for Summer 2027 SWE & AI internships.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Someshwar Joshi | SWE, Backend & Applied AI Portfolio",
+    title: "Someshwar Joshi | Backend & Applied AI Engineering Node",
     description:
-      "Portfolio of Someshwar Joshi, a 3rd-year CSE undergrad focused on backend systems, applied AI, security, and product engineering.",
+      "Portfolio of Someshwar Joshi: Java (Spring Boot), Python (FastAPI), ONNX Runtime, PostgreSQL, Docker, and full-stack product engineering.",
     url: "/",
     siteName: "Someshwar Joshi Portfolio",
     images: [
@@ -44,9 +44,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Someshwar Joshi | SWE, Backend & Applied AI Portfolio",
+    title: "Someshwar Joshi | Backend & Applied AI Engineering Node",
     description:
-      "Backend, applied AI, security, and product engineering portfolio for Summer 2027 internship opportunities.",
+      "Backend, applied AI, security, and cloud data pipelines portfolio for Summer 2027 internship opportunities.",
     images: ["/images/SomeshwarJoshi-Profile.jpeg"],
   },
   icons: {
@@ -61,7 +61,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
