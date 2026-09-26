@@ -63,38 +63,51 @@ interface Project {
 const PROJECTS: Project[] = [
   {
     id: "campus-tracker",
-    title: "Campus Project Tracker",
+    title: "Campus Project & Internship Tracker",
     tag: "CORE_BACKEND_NODE",
-    badge: "Production Architecture",
-    category: "Full-Stack Enterprise & Academic Platform",
+    badge: "785+ Req/s // 0.00% Errors",
+    category: "High-Throughput Enterprise & Academic Platform",
     period: "May 2026 – Present",
-    stack: ["Java", "Spring Boot", "PostgreSQL", "Docker", "JWT", "Maven", "GitHub Actions"],
+    stack: [
+      "Java 21",
+      "Spring Boot 3.5",
+      "Virtual Threads (Loom)",
+      "PostgreSQL 17",
+      "Caffeine Cache",
+      "HikariCP",
+      "Flyway",
+      "Docker",
+      "JWT",
+      "GitHub Actions",
+    ],
     brief:
-      "A centralized academic platform engineered to track, evaluate, and manage university project submissions at scale with high-throughput database efficiency.",
+      "A high-throughput enterprise academic & internship tracking engine scaled to 785+ req/sec using Java 21 Virtual Threads (Loom), Caffeine in-memory caching, and optimized JPQL fetch joins.",
     architecture:
-      "Stateless Spring Boot REST API Layer with custom security filter chains -> JPA/Hibernate ORM -> Highly normalized PostgreSQL schema with composite multi-column indexing. Containerized via Docker with automated GitHub Actions CI/CD running Maven/JUnit test suites on every commit.",
+      "React Client -> Stateless Spring Security JWT (OncePerRequestFilter + sliding-window IP rate limiter) -> Java 21 Virtual Threads (Loom) -> Caffeine In-Memory Cache (@Cacheable with write-event invalidation) -> JPQL Fetch Joins & DTO Projections -> HikariCP Pool -> PostgreSQL 17 (3NF, Flyway migrations, composite B-tree indexes) -> Automated GitHub Actions CI/CD.",
     diagram: [
-      "Client UI",
-      "Stateless JWT Filter",
-      "Spring Security Guard",
-      "Service Aggregations",
-      "PostgreSQL (Composite Indexes)",
-      "Docker CI/CD",
+      "React UI",
+      "Spring Security (Rate Limiter)",
+      "Virtual Threads (Loom)",
+      "Caffeine Cache (4.7ms)",
+      "HikariCP / Flyway (3NF)",
+      "PostgreSQL 17 (B-Tree)",
     ],
     metrics: [
-      "Eliminated N+1 query bottlenecks via optimized single-query Spring/JPQL aggregations",
-      "Stateless JWT authentication APIs with in-memory rate limiting against brute-force attacks",
-      "Dockerized container builds with automated GitHub Actions testing CI/CD pipeline",
+      "Sustained 785+ Requests/Sec (47,000+ req/min) across 200 concurrent users with 0.00% error rate (p50: 65ms, p99: 211ms)",
+      "Reduced listing latency from ~531ms to ~4.7ms (99.1% drop) via Caffeine in-memory caching (@Cacheable)",
+      "Eliminated N+1 query bottlenecks and reduced JVM heap footprint by replacing Hibernate entity iteration with optimized JPQL Fetch Joins and DTO projections",
     ],
     decisions: [
-      "Replaced in-memory evaluation loops with composite database indexes to execute single-query aggregates.",
-      "Applied stateless JWT verification in custom filter chains to protect administrative endpoints.",
-      "Enforced automated Maven/JUnit unit and integration tests inside Docker CI/CD before staging deploy.",
+      "Scaled concurrency with Java 21 Virtual Threads and fine-tuned HikariCP connection pooling to achieve 785+ req/sec under heavy concurrent load.",
+      "Integrated Caffeine in-memory caching (@Cacheable) with automated write invalidation, cutting query times from ~531ms down to ~4.7ms.",
+      "Replaced Hibernate entity iteration with optimized JPQL Fetch Joins, DTO projections, and database-level scalar counts to eliminate N+1 bottlenecks.",
+      "Implemented stateless JWT authentication with Spring Security, custom OncePerRequestFilter chain, and an in-memory sliding-window IP rate limiter defending against credential stuffing.",
+      "Enforced strict relational integrity (3NF) and database migrations with Flyway (ddl-auto=validate) and composite B-tree indexing on status/company id.",
     ],
     tradeoff:
-      "Strict schema normalization and composite indexing require deliberate migrations, but maximize read speed and data consistency across concurrent student records.",
+      "In-memory Caffeine caching requires strict cache eviction on write events, which was automated to guarantee zero stale reads while preserving 4.7ms response latency.",
     future:
-      "Introduce Redis caching for real-time leaderboard statistics and asynchronous batch PDF generation for faculty rubrics.",
+      "Introduce distributed Redis pub/sub for cross-node cache invalidation and asynchronous batch PDF generation for faculty review rubrics.",
     demo: "https://project-tracker-frontend-cyan.vercel.app/",
     repo: "https://github.com/someshwarjoshisomu-source/dbms_cbp.git",
   },
@@ -177,6 +190,12 @@ const METRICS_DATA = [
     status: "active",
   },
   {
+    title: "BACKEND_CONCURRENCY",
+    value: "785+ Req/Sec",
+    subtext: "Java 21 Virtual Threads & 4.7ms Caffeine latency",
+    status: "active",
+  },
+  {
     title: "COMPUTER_VISION_PIPELINE",
     value: "0% False Positives",
     subtext: "ONNX Runtime & 512-dim facial embeddings @ MyClassBoard",
@@ -187,12 +206,6 @@ const METRICS_DATA = [
     value: "1st Place Winner",
     subtext: "University Webathon (Post-Op Guardian)",
     status: "milestone",
-  },
-  {
-    title: "ML_DATASET_SCALE",
-    value: "50,000+ Records",
-    subtext: "Trained threat vectors in PhishGuard security extension",
-    status: "active",
   },
   {
     title: "TEST_RELIABILITY",
@@ -212,37 +225,37 @@ const SKILL_CATEGORIES = [
   {
     title: "Languages",
     icon: Code2,
-    skills: ["Java", "Python", "C++", "C", "JavaScript", "TypeScript", "SQL", "HTML/CSS"],
+    skills: ["Java 21", "Python", "C++", "C", "JavaScript", "TypeScript", "SQL", "HTML/CSS"],
   },
   {
     title: "Backend & Web Services",
     icon: ServerIcon,
-    skills: ["Spring Boot", "FastAPI", "Node.js", "Express.js", "RESTful APIs", "SOAP", "Asyncio"],
+    skills: ["Spring Boot 3.5", "Virtual Threads (Loom)", "FastAPI", "Node.js", "Express.js", "RESTful APIs"],
   },
   {
     title: "Systems & Algorithms",
     icon: Cpu,
-    skills: ["Data Structures", "Object-Oriented Design", "Relational Database Optimization", "Complexity Analysis"],
+    skills: ["Data Structures", "Object-Oriented Design", "Relational Database Optimization"],
   },
   {
     title: "Databases & Storage",
     icon: Database,
-    skills: ["PostgreSQL", "Oracle SQL", "MySQL", "MongoDB", "Redis", "Connection Pooling"],
+    skills: ["PostgreSQL 17", "Oracle SQL", "MySQL", "MongoDB", "Redis", "Flyway", "HikariCP"],
   },
   {
-    title: "Cloud, AI & DevOps",
+    title: "Cloud & DevOps",
     icon: Layers,
-    skills: ["Google Cloud Platform (GCS)", "ONNX Runtime", "OpenCV", "Supabase", "Docker", "GitHub Actions", "CI/CD"],
+    skills: ["Google Cloud Platform (GCS, Vision API)", "Supabase", "Docker", "GitHub Actions", "CI/CD"],
   },
   {
     title: "Frontend Engineering",
     icon: Zap,
-    skills: ["React.js", "Next.js", "Tailwind CSS", "Bootstrap", "Framer Motion"],
+    skills: ["React.js 19", "Next.js", "Tailwind CSS", "Bootstrap"],
   },
   {
     title: "Tools & Testing",
     icon: ShieldCheck,
-    skills: ["Git", "GitHub", "Maven", "JUnit", "Pytest", "Figma", "StarUML"],
+    skills: ["Git", "GitHub", "Maven", "JUnit", "Pytest", "Caffeine"],
   },
 ];
 
@@ -536,14 +549,14 @@ export default function Home() {
       full: "At MyClassBoard, Someshwar developed asynchronous backend services with FastAPI and Python for AgentP. He engineered a computer vision pipeline with ONNX Runtime and OpenCV, applying 5-point facial landmark alignment and 512-dimensional embeddings, driving the false-positive match rate to 0%.",
     },
     campus_tracker: {
-      label: "Campus Project Tracker",
-      text: "Built normalized PostgreSQL schema with composite indexes, Spring Boot JPQL aggregations, stateless JWT, and Docker CI/CD.",
-      full: "Campus Project Tracker is an enterprise academic evaluation platform built with Java, Spring Boot, and PostgreSQL. Someshwar eliminated N-plus-one query bottlenecks via composite multi-column indexing, implemented stateless JWT authentication, and containerized the architecture with Docker and GitHub Actions CI/CD.",
+      label: "Campus Project & Internship Tracker",
+      text: "Scaled to 785+ req/sec with Java 21 Virtual Threads, Caffeine caching (4.7ms latency), and PostgreSQL with Flyway.",
+      full: "Campus Project & Internship Tracker is a high-throughput enterprise platform built with Java 21, Spring Boot 3.5, and PostgreSQL 17. Someshwar scaled backend concurrency using Java 21 Virtual Threads and fine-tuned HikariCP pooling to sustain 785+ requests per second with 0% error rate. He integrated Caffeine in-memory caching to drop query latencies by 99.1% to 4.7 milliseconds, and eliminated N-plus-one query bottlenecks using optimized JPQL Fetch Joins and DTO projections.",
     },
     forte: {
-      label: "ForteHR Internship",
-      text: "Architected ForteHR using React, TypeScript, Supabase RBAC, and OpenAI API integrations.",
-      full: "During his software engineer internship at Forte, Someshwar built ForteHR, an internal full-stack analytics platform. He implemented role-based access control policies using Supabase Row-Level Security and integrated OpenAI API assistants to automate HR reporting workflows.",
+      label: "FORTE (ForteHR Platform)",
+      text: "Architected ForteHR with React, TypeScript, Supabase RBAC, and an async OpenAI LLM pipeline with semantic caching.",
+      full: "During his software engineer internship at FORTE, Someshwar built ForteHR, an internal full-stack AI-powered HR analytics platform. He architected role-based access control with Supabase Row-Level Security and designed an asynchronous LLM processing pipeline with the OpenAI API, implementing semantic caching to reduce token usage and API overhead.",
     },
     phishguard: {
       label: "PhishGuard (Designathon)",
@@ -613,10 +626,10 @@ export default function Home() {
         "CV PIPELINE METRICS:\nTarget: AgentP Automated Photo Matching\nEmbedding Dimension: 512-D vectors\nFalse Positive Match Rate: 0.0%\nRuntime Engine: ONNX Runtime + OpenCV 5-point landmark alignment\nTest Coverage: 500+ Pytest tests";
     } else if (cleanCmd === "projects") {
       response =
-        "ACTIVE NODES:\n1. Campus Project Tracker (Java, Spring Boot, PostgreSQL, Docker, JWT)\n2. Post-Op Guardian (React, Node.js, REST APIs, Webathon 1st Place Winner)\n3. PhishGuard ML (React, Scikit-learn, Redis, Gemini AI, Designathon 2nd Runner-Up)";
+        "ACTIVE NODES:\n1. Campus Project & Internship Tracker (Java 21, Spring Boot 3.5, Virtual Threads, Caffeine, PostgreSQL 17, 785+ req/s)\n2. Post-Op Guardian (React, Node.js, REST APIs, Webathon 1st Place Winner)\n3. PhishGuard ML (React, Scikit-learn, Redis, Gemini AI, Designathon 2nd Runner-Up)";
     } else if (cleanCmd === "skills") {
       response =
-        "STACK MATRIX:\n- Languages: Java, Python, C++, TypeScript, SQL\n- Backend: Spring Boot, FastAPI, Node.js, Express, RESTful APIs\n- DB: PostgreSQL (Composite Indexes), MongoDB, Redis\n- DevOps: Docker, GitHub Actions CI/CD, GCP GCS";
+        "STACK MATRIX:\n- Languages: Java 21, Python, C++, C, TypeScript, SQL\n- Backend: Spring Boot 3.5, Virtual Threads (Loom), FastAPI, Node.js, Express, REST APIs\n- DB: PostgreSQL 17, Oracle SQL, MySQL, MongoDB, Redis, Flyway, HikariCP\n- Cloud & DevOps: GCP, Supabase, Docker, GitHub Actions CI/CD";
     } else if (cleanCmd === "ping") {
       response = "PONG! Telemetry link downstream latency: 12ms. Packet loss: 0.0%.";
     } else if (cleanCmd === "clear") {
@@ -1198,25 +1211,25 @@ export default function Home() {
                 <li className="flex gap-2">
                   <span className="mt-1 size-1.5 shrink-0 rounded-full bg-purple-400" />
                   <span>
-                    Architected <strong>ForteHR</strong>, an internal full-stack AI-powered HR analytics platform (React, TypeScript, Supabase) with <strong>RBAC</strong>, enabling secure and automated operational workflows for HR stakeholders.
+                    Architected <strong>ForteHR</strong>, an internal full-stack AI-powered HR analytics platform (React, TypeScript, Supabase) with <strong>RBAC</strong>, enabling secure and modernized operational workflows for HR stakeholders.
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-1 size-1.5 shrink-0 rounded-full bg-sky-400" />
                   <span>
-                    Implemented <strong>Supabase Row-Level Security (RLS)</strong> policies enforcing strict tenant boundaries and preventing unauthorized cross-department data mutation.
+                    Designed an asynchronous LLM processing pipeline using the <strong>OpenAI API</strong> and custom system prompting, implementing <strong>semantic caching</strong> to reduce token usage and API overhead for complex HR data requirements.
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-1 size-1.5 shrink-0 rounded-full bg-purple-400" />
                   <span>
-                    Integrated the <strong>OpenAI API</strong> to power a custom AI assistant, translating complex HR data requirements into technical solutions and eliminating manual report generation bottlenecks.
+                    Implemented <strong>Supabase Row-Level Security (RLS)</strong> policies and database functions enforcing strict tenant boundaries and eliminating manual reporting bottlenecks.
                   </span>
                 </li>
               </ul>
 
               <div className="flex flex-wrap gap-1.5 pt-3 border-t border-zinc-900">
-                {["React", "TypeScript", "Supabase RLS", "PostgreSQL", "OpenAI API", "RBAC"].map((t) => (
+                {["React", "TypeScript", "Supabase RLS", "PostgreSQL", "OpenAI API", "Semantic Caching", "RBAC"].map((t) => (
                   <span key={t} className="font-mono text-[10px] bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded text-zinc-400">
                     {t}
                   </span>
@@ -1572,12 +1585,12 @@ export default function Home() {
                     </div>
 
                     <p className="text-xs leading-5 text-zinc-300 font-sans">
-                      ⚙️ Shipped <strong>Campus Project Tracker</strong>! Architected in <strong>Java</strong> and <strong>Spring Boot</strong> with a highly normalized <strong>PostgreSQL</strong> schema. We replaced slow in-memory loop aggregates with single-query JPQL aggregations and composite multi-column indexing, deployed with Docker and GitHub Actions CI/CD! #SpringBoot #Java #PostgreSQL #Docker
+                      ⚙️ Shipped <strong>Campus Project & Internship Tracker</strong>! Scaled backend concurrency using <strong>Java 21 Virtual Threads (Project Loom)</strong> and fine-tuned <strong>HikariCP</strong> pooling to sustain <strong>785+ req/sec</strong> (47,000+ req/min) with 0.00% error rate. Slashed query latency from ~531ms to <strong>~4.7ms</strong> (99.1% drop) via Caffeine in-memory caching (@Cacheable), eliminated N+1 bottlenecks via JPQL Fetch Joins & DTO projections, and enforced strict 3NF with Flyway! #Java21 #SpringBoot #ProjectLoom #PostgreSQL #Caffeine
                     </p>
 
                     <div className="border border-zinc-800 bg-black/40 rounded-lg p-3 mt-3 font-mono text-[10px]">
-                      <span className="text-sky-400 block font-bold">SYSTEM RELEASE</span>
-                      <span className="text-zinc-300">Spring Boot • Stateless JWT • Docker Containerization</span>
+                      <span className="text-sky-400 block font-bold">HIGH-THROUGHPUT ENGINE RELEASE</span>
+                      <span className="text-zinc-300">Java 21 Virtual Threads • 785+ Req/s • Caffeine 4.7ms Cache • Flyway</span>
                     </div>
                   </div>
 
@@ -1718,20 +1731,20 @@ export default function Home() {
                         {activeSlide === 2 && (
                           <>
                             <h3 className="text-3xl font-bold text-white tracking-tight leading-tight">
-                              Campus Project Tracker (Spring Boot & Docker)
+                              Campus Project & Internship Tracker (Java 21 & Spring Boot)
                             </h3>
                             <p className="text-sm text-zinc-300 font-sans leading-relaxed">
-                              Eliminated N+1 query bottlenecks on large-scale student project evaluations by replacing in-memory loops with single-query JPQL aggregations and composite database indexes.
+                              Scaled concurrency to 785+ req/sec using Java 21 Virtual Threads and fine-tuned HikariCP pooling. Reduced listing latency from ~531ms to ~4.7ms (99.1% drop) with Caffeine caching, eliminating N+1 bottlenecks via JPQL fetch joins.
                             </p>
                             <div className="flex flex-wrap gap-2 mt-4 font-mono text-xs">
                               <span className="px-3 py-1.5 rounded bg-sky-500/10 border border-sky-500/30 text-sky-300">
-                                Spring Security JWT
+                                785+ Req/s // 0.00% Errors
                               </span>
                               <span className="px-3 py-1.5 rounded bg-zinc-800 text-zinc-300">
-                                Composite Indexing
+                                Caffeine ~4.7ms Latency
                               </span>
                               <span className="px-3 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
-                                Docker CI/CD
+                                Virtual Threads (Loom)
                               </span>
                             </div>
                           </>
